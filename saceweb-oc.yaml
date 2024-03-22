@@ -1,0 +1,95 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+objects:
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      io.kompose.service: saceweb
+    name: saceweb
+  spec:
+    replicas: 1
+    selector:
+      io.kompose.service: saceweb
+    template:
+      metadata:
+        labels:
+          io.kompose.network/openshift-default: "true"
+          io.kompose.service: saceweb
+      spec:
+        containers:
+          - env:
+              - name: JAVA_XMX
+                value: 3096
+              - name: JAVA_XMS
+                value: 2098
+              - name: JDBC_URL
+                value: jdbc:postgresql://postgresdb:5432/sace
+              - name: ativarAgendamentos
+                value: false
+              - name: ativarRecuperacoes
+                value: false
+              - name: boundMap
+                value: new OpenLayers.Bounds(-65\,-2\,-59\,6)
+              - name: imageDir
+                value: /home/ubuntu/cprm/image
+              - name: nomeSistema
+                value: Bacia do Rio Doce
+              - name: urlGeoserver
+                value: https://sace.sgb.gov.br/geoserver
+              - name: workspaceGeoserver
+                value: DOCE
+              - name: urlSistema
+                value: http://localhost/sace-web
+            image: ' '
+            name: saceweb
+            ports:
+              - containerPort: 8080
+                hostPort: 8080
+                protocol: TCP
+              - containerPort: 8080
+                protocol: TCP
+        restartPolicy: Always
+    test: false
+    triggers:
+      - type: ConfigChange
+      - imageChangeParams:
+          automatic: true
+          containerNames:
+            - saceweb
+          from:
+            kind: ImageStreamTag
+            name: saceweb:latest
+        type: ImageChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      io.kompose.service: saceweb
+    name: saceweb
+  spec:
+    ports:
+      - name: "8080"
+        port: 8080
+        targetPort: 8080
+      - name: 8080-tcp
+        port: 8080
+        targetPort: 8080
+    selector:
+      io.kompose.service: saceweb
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    labels:
+      io.kompose.service: saceweb
+    name: saceweb
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+      - from:
+          kind: DockerImage
+          name: saceweb
+        name: latest
+        referencePolicy:
+          type: ""

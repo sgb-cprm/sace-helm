@@ -1,0 +1,20 @@
+{{- if .Values.pvc.enabled -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "sace.fullname" . }}-pvc
+  labels:
+    {{- include "sace.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  {{- with .Values.pvc.storage }}
+  {{- if .className }}
+  storageClassName: {{ .className }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .size }}
+  {{- end }}
+{{- end }}

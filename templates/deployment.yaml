@@ -59,9 +59,9 @@ spec:
             {{- end }}
           env:
             - name: JAVA_XMX
-              value: "{{ .Values.config.JAVA_XMX }}"
+              value: {{ .Values.config.JAVA_XMX | toString }}
             - name: JAVA_XMS
-              value: "{{ .Values.config.JAVA_XMS }}"
+              value: {{ .Values.config.JAVA_XMS | toString }}
             - name: JDBC_URL
               value: {{ .Values.config.JDBC_URL }}
             - name: POSTGRES_USER
@@ -69,9 +69,9 @@ spec:
             - name: POSTGRES_PASS
               value: {{ .Values.config.POSTGRES_PASS }}
             - name: ativarAgendamentos
-              value: "{{ .Values.config.ativarAgendamentos }}"
+              value: {{ .Values.config.ativarAgendamentos | toString }}
             - name: ativarRecuperacoes
-              value: "{{ .Values.config.ativarRecuperacoes }}"
+              value: {{ .Values.config.ativarRecuperacoes | toString }}
             - name: boundMap
               value: {{ .Values.config.boundMap }}
             - name: imageDir

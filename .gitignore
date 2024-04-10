@@ -1,2 +1,4 @@
 *.lock
 charts/
+
+.DS_Store

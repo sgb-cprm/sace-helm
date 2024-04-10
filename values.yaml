@@ -100,3 +100,12 @@ config:
   nomeSistema: Bacia do Branco
   imageDir: /mnt/sace/data
   urlSistema: http://sace-web.apps-crc.testing/sace-web
+
+postgresql: 
+  enabled: false
+  image:
+    tag: 14.11.0
+
+global:
+  postgresql:
+    postgresqlPassword: postgres

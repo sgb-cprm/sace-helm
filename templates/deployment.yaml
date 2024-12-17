@@ -44,85 +44,24 @@ spec:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
           volumeMounts:
             {{- if .Values.pvc.enabled }}
             - mountPath: {{ .Values.config.imageDir }}
               name: sace-data
             {{- end }}
-          env:
-            - name: JAVA_XMX
-              valueFrom:
-                configMap:
-                  key:  JAVA_XMX
-                  name: {{ include "sace.fullname" . }}-configmap
-            - name: JAVA_XMS
-              valueFrom:
-                configMap:
-                  key:  JAVA_XMS
-                  name: {{ include "sace.fullname" . }}-configmap
-            - name: JDBC_URL
-              valueFrom:
-                secretKeyRef:
-                  key:  JDBC_URL
-                  name: {{ include "sace.fullname" . }}-secret
-            - name: POSTGRES_USER
-              valueFrom:
-                secretKeyRef:
-                  key:  POSTGRES_USER
-                  name: {{ include "sace.fullname" . }}-secret
-            - name: POSTGRES_PASS
-              valueFrom:
-                secretKeyRef:
-                  key:  POSTGRES_PASS
-                  name: {{ include "sace.fullname" . }}-secret
-            - name: ativarAgendamentos
-              valueFrom:
-                configMap:
-                  key:  ativarAgendamentos
-                  name: {{ include "sace.fullname" . }}-configmap
-            - name: ativarRecuperacoes
-              valueFrom:
-                configMap:
-                  key:  ativarRecuperacoes
-                  name: {{ include "sace.fullname" . }}-configmap
-            - name: boundMap
-              valueFrom:
-                configMap:
-                  key:  boundMap
-                  name: {{ include "sace.fullname" . }}-configmap
-            - name: imageDir
-              valueFrom:
-                configMap:
-                  key:  imageDir
-                  name: {{ include "sace.fullname" . }}-configmap
-            - name: nomeSistema
-              valueFrom:
-                configMap:
-                  key:  nomeSistema
-                  name: {{ include "sace.fullname" . }}-configmap
-            - name: urlGeoserver
-              valueFrom:
-                configMap:
-                  key:  urlGeoserver
-                  name: {{ include "sace.fullname" . }}-configmap
-            - name: workspaceGeoserver
-              valueFrom:
-                configMap:
-                  key:  workspaceGeoserver
-                  name: {{ include "sace.fullname" . }}-configmap
-            - name: urlSistema
-              valueFrom:
-                configMap:
-                  key:  urlSistema
-                  name: {{ include "sace.fullname" . }}-configmap
+          envFrom:
+            - configMapRef:
+                name: {{ include "sace.fullname" . }}-configmap
+            - secretRef:
+                name: {{ include "sace.fullname" . }}-secret
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

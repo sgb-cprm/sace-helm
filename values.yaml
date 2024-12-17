@@ -101,6 +101,12 @@ config:
   imageDir: /mnt/sace/data
   urlSistema: http://sace-web.apps-crc.testing/sace-web
 
+reverseProxy: 
+  enabled: false
+
+geoserver: 
+  enabled: false
+
 postgresql: 
   enabled: false
   image:

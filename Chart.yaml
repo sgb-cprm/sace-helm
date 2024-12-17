@@ -35,6 +35,16 @@ appVersion: "latest"
 #     alias: (optional) Alias to be used for the chart. Useful when you have to add the same chart multiple times
 
 dependencies: # A list of the chart requirements (optional)
+  - name: nginx
+    version: 0.1.0
+    repository: https://nds-cprm.github.io/helm-charts
+    condition: reverseProxy.enabled
+
+  - name: geoserver
+    version: 0.5.0
+    repository: https://nds-cprm.github.io/helm-charts
+    condition: geoserver.enabled
+
   - name: postgresql
     version: 15.2.4
     repository: https://charts.bitnami.com/bitnami

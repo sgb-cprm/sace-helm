@@ -2,3 +2,8 @@
 charts/
 
 .DS_Store
+
+# geoserver
+docker/geoserver/cluster/kahadb/
+docker/geoserver/cluster/embedded-broker.properties
+docker/geoserver/logs

@@ -1,5 +1,5 @@
 *.lock
-charts/
+charts/*/charts
 
 .DS_Store
 

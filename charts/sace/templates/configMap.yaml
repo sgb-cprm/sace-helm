@@ -12,7 +12,7 @@ data:
   boundMap: {{ .Values.config.boundMap | quote }}
   ativarAgendamentos: {{ .Values.config.ativarAgendamentos | quote }}
   ativarRecuperacoes: {{ .Values.config.ativarRecuperacoes | quote }}
-  nomeSistema: {{ .Values.config.JAVA_XMX | quote }}
+  nomeSistema: {{ .Values.config.nomeSistema | quote }}
   imageDir: {{ .Values.config.imageDir | quote }}
   urlSistema: {{ .Values.config.urlSistema | quote }}
 immutable: false

@@ -38,7 +38,7 @@ securityContext: {}
 
 service:
   type: ClusterIP
-  port: 8080
+  port: 8082
 
 ingress:
   enabled: true
@@ -84,6 +84,7 @@ affinity: {}
 pvc:
   enabled: false
   storage: 
+    # className: ''
     size: 100Mi
 
 config:
@@ -100,6 +101,8 @@ config:
   nomeSistema: Bacia do Branco
   imageDir: /mnt/sace/data
   urlSistema: http://sace-web.apps-crc.testing/sace-web
+
+# Dependencies
 
 reverseProxy: 
   enabled: false

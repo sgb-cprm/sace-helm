@@ -1,0 +1,160 @@
+configs:
+  - name: Rio Branco
+    url: http://sace.sgb-sace-homolog.apps-crc.testing/branco
+    imageDir: /mnt/sace/data
+    bounds:
+      minX: -65
+      minY: -2
+      maxX: -59
+      maxY: 6
+    enableScheduling: true
+    enableRetrieve: true
+    jvm:
+      xmx: 3096
+      xms: 2098
+    db:
+      url: jdbc:postgresql://sace-postgresql.sgb-sace-homolog.svc.cluster.local:5432/sace_branco
+      user: sace
+      pass: sace
+    geoserver:
+      workspace: BRANCO
+      url: http://sace.sgb-sace-homolog.apps-crc.testing/geoserver
+  - name: Rio Araguaia
+    url: http://sace.sgb-sace-homolog.apps-crc.testing/branco
+    imageDir: /mnt/sace/data
+    bounds:
+      minX: -65
+      minY: -2
+      maxX: -59
+      maxY: 6
+    enableScheduling: true
+    enableRetrieve: true
+    jvm:
+      xmx: 3096
+      xms: 2098
+    db:
+      url: jdbc:postgresql://sace-postgresql.sgb-sace-homolog.svc.cluster.local:5432/sace_araguaia
+      user: sace
+      pass: sace
+    geoserver:
+      workspace: ARAGUAIA
+      url: http://sace.sgb-sace-homolog.apps-crc.testing/geoserver
+    overrideValues:
+      # replicaCount: 2
+      # autoscaling:
+      #   enabled: true
+      pvc:
+        # className: thin-csi
+        size: 10Gi
+      
+image:
+  repository: docker.io/cmotadev/sace
+  tag: testing
+ingress:
+  enabled: false
+  hosts:
+    - host: sace.sgb-sace-homolog.apps-crc.testing
+      paths:
+        - path: /sace-web
+          pathType: ImplementationSpecific
+pvc:
+  size: 5Gi
+
+replicaCount: 1
+
+reverseProxy:
+  enabled: false  
+
+geoserver:
+  enabled: true
+  config:
+    # cors:
+    #   allowedOrigins:
+    #     - '*'
+    csrf:
+      disabled: true
+    proxyBaseURL: 'http://sace.sgb-sace-homolog.apps-crc.testing/geoserver'
+  image:
+    tag: 2.24.4
+  imagePullPolicy: Always
+  ingress:
+    enabled: false
+    hosts:
+      - host: sace.sgb-sace-homolog.apps-crc.testing
+        paths:
+          - path: /geoserver
+            pathType: ImplementationSpecific
+  pvc:
+    data:
+      enabled: true
+      storage:
+        accessModes:
+          - ReadWriteOnce
+        mountPath: /srv/geoserver/data
+        size: 5Gi
+
+postgresql: 
+  enabled: true
+  auth:
+    username: "sace"
+    password: "sace"
+    database: "sace"
+    postgresPassword: "postgres"
+
+nginx:
+  ingress:
+    enabled: true
+    hosts:
+      - host: sace.sgb-sace-homolog.apps-crc.testing
+        paths:
+          - path: /
+            pathType: ImplementationSpecific  
+
+  overrides:
+    conf_d:
+      default: |-
+        server {
+            listen       8080;
+            server_name  _;
+
+            #access_log  /var/log/nginx/host.access.log  main;
+
+            location / {
+              root   /usr/share/nginx/html;
+              index  index.html index.htm;
+            }
+
+            location /geoserver {
+              proxy_set_header Host $http_host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+
+              proxy_pass http://sace-geoserver.sgb-sace-homolog.svc.cluster.local:8080/geoserver;
+            }
+
+            location /branco {
+              proxy_set_header Host $http_host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+              proxy_redirect     off;
+
+              # rewrite url and content
+              rewrite /branco(.*) /sace-web$1  break;
+              proxy_set_header Accept-Encoding "";
+              sub_filter '<title>CPRM</title>' '<title>SGB/CPRM - Bacia do Rio Branco</title>';
+              sub_filter '/sace-web' '/branco';
+              sub_filter_once off;
+
+              proxy_pass http://sace.sgb-sace-homolog.svc.cluster.local:8082/sace-web/;
+            }
+
+            #error_page  404              /404.html;
+
+            # redirect server error pages to the static page /50x.html
+            error_page   500 502 503 504  /50x.html;
+            location = /50x.html {
+              root   /usr/share/nginx/html;
+            }
+        }

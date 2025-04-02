@@ -82,25 +82,33 @@ tolerations: []
 affinity: {}
 
 pvc:
-  enabled: false
-  storage: 
-    # className: ''
-    size: 100Mi
+  # className: ''
+  size: 100Mi
 
-config:
-  JAVA_XMX: 3096
-  JAVA_XMS: 2098
-  JDBC_URL: jdbc:postgresql://postgresdb:5432/sace
-  POSTGRES_USER: postgres
-  POSTGRES_PASS: postgres
-  workspaceGeoserver: BRANCO
-  urlGeoserver: https://sace.sgb.gov.br/geoserver
-  boundMap: new OpenLayers.Bounds(-65\,-2\,-59\,6)
-  ativarAgendamentos: false
-  ativarRecuperacoes: false
-  nomeSistema: Bacia do Branco
-  imageDir: /mnt/sace/data
-  urlSistema: http://sace-web.apps-crc.testing/sace-web
+# Array of objects
+configs:
+  - name: Bacia do Branco
+    # Mandar gerar a partir de ingress
+    url: http://sace-web.apps-crc.testing/sace-web
+    imageDir: /mnt/sace/data
+    bounds:
+      minX: -65
+      minY: -2
+      maxX: -59
+      maxY: 6
+    enableScheduling: false
+    enableRetrieve: false
+    jvm:
+      xmx: 3096
+      xms: 2098
+    db:
+      url: jdbc:postgresql://postgresdb:5432/sace
+      user: postgres
+      pass: postgres
+    geoserver:
+      workspace: BRANCO
+      url: https://sace.sgb.gov.br/geoserver
+    overrideValues: {}
 
 # Dependencies
 

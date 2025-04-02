@@ -1,28 +1,49 @@
-{{- if .Values.autoscaling.enabled }}
-apiVersion: autoscaling/v2beta1
+{{- $saceName := (include "sace.fullname" .) -}}
+{{- $saceLabels := (include "sace.labels" .) -}}
+{{- $saceConfig := .Values.configs -}}
+{{- $listLength := len $saceConfig -}}
+
+{{- range $index, $item := $saceConfig -}}
+{{- $_saceBacia := ($item.name | lower | replace " " "-" | replace "_" "-") -}}
+{{- $_saceName := (printf "%s-%s" $saceName $_saceBacia) | trunc 63 | trimSuffix "-" -}}
+{{- $_overrideValues := (hasKey $item "overrideValues" | ternary $item.overrideValues dict) -}}
+
+{{- $_hpa := (hasKey $_overrideValues "autoscaling" | ternary $_overrideValues.autoscaling $.Values.autoscaling) -}}
+{{- if $_hpa.enabled }}
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "sace.fullname" . }}
+  name: {{ $_saceName }}
   labels:
-    {{- include "sace.labels" . | nindent 4 }}
+    {{- $saceLabels | nindent 4 }}
+    sace.sgb.gov.br/bacia: {{ $_saceBacia }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "sace.fullname" . }}
-  minReplicas: {{ .Values.autoscaling.minReplicas }}
-  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+    name: {{ $_saceName }}
+  minReplicas: {{ $_hpa.minReplicas }}
+  maxReplicas: {{ $_hpa.maxReplicas }}
   metrics:
-    {{- if .Values.autoscaling.targetCPUUtilizationPercentage }}
+    {{- if $_hpa.targetCPUUtilizationPercentage }}
     - type: Resource
       resource:
         name: cpu
-        targetAverageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
+        target:
+          averageUtilization: {{ $_hpa.targetCPUUtilizationPercentage }}
+          type: Utilization
     {{- end }}
-    {{- if .Values.autoscaling.targetMemoryUtilizationPercentage }}
-    - type: Resource
+    {{- if $_hpa.targetMemoryUtilizationPercentage }}
+     - type: Resource
       resource:
         name: memory
-        targetAverageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}
+        target:
+          averageUtilization: {{ $_hpa.targetMemoryUtilizationPercentage }}
+          type: Utilization
     {{- end }}
 {{- end }}
+
+{{ if ne (add1 $index) $listLength -}}
+---
+{{- end -}}
+{{- end -}}

@@ -1,48 +1,66 @@
+{{- $saceServiceAccount := (include "sace.serviceAccountName" .) -}}
+{{- $saceName := (include "sace.fullname" .) -}}
+{{- $saceLabels := (include "sace.labels" .) -}}
+{{- $saceSelectorLabels := (include "sace.selectorLabels" .) -}}
+{{- $saceConfig := .Values.configs -}}
+{{- $listLength := len $saceConfig -}}
+
+{{- range $index, $item := $saceConfig -}}
+{{- $_saceBacia := ($item.name | lower | replace " " "-" | replace "_" "-") -}}
+{{- $_saceName := (printf "%s-%s" $saceName $_saceBacia) | trunc 63 | trimSuffix "-" -}}
+{{- $_overrideValues := (hasKey $item "overrideValues" | ternary $item.overrideValues dict) -}}
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "sace.fullname" . }}
+  name: {{ $_saceName }}
   labels:
-    {{- include "sace.labels" . | nindent 4 }}
+    {{- $saceLabels | nindent 4 }}
+    sace.sgb.gov.br/bacia: {{ $_saceBacia }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
+  {{- $_hpa := (hasKey $_overrideValues "autoscaling" | ternary $_overrideValues.autoscaling $.Values.autoscaling) }}
+  {{- if not $_hpa.enabled }}
+  {{- $_replicaCount := (hasKey $_overrideValues "replicaCount" | ternary $_overrideValues.replicaCount $.Values.replicaCount) }}
+  replicas: {{ $_replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "sace.selectorLabels" . | nindent 6 }}
+      {{- $saceSelectorLabels | nindent 6 }}
+      sace.sgb.gov.br/bacia: {{ $_saceBacia }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
+      {{- $_podAnnotations := (hasKey $_overrideValues "podAnnotations" | ternary $_overrideValues.podAnnotations $.Values.podAnnotations) }}
+      {{- with $_podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "sace.selectorLabels" . | nindent 8 }}
+        {{- $saceSelectorLabels | nindent 8 }}
+        sace.sgb.gov.br/bacia: {{ $_saceBacia }}
     spec:
-      {{- with .Values.imagePullSecrets }}
+      {{- with $.Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "sace.serviceAccountName" . }}
+      serviceAccountName: {{ $saceServiceAccount }}
+      {{- $_podSecurityContext := (hasKey $_overrideValues "podSecurityContext" | ternary $_overrideValues.podSecurityContext $.Values.podSecurityContext) }}
       securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        {{- toYaml $.Values.podSecurityContext | nindent 8 }}
       restartPolicy: Always
       volumes:
-        {{- if .Values.pvc.enabled }}
         - name: sace-data
           persistentVolumeClaim:
-            claimName: {{ include "sace.fullname" . }}-pvc
-        {{- end }}
+            claimName: {{ $_saceName }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ $.Chart.Name }}
           securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+            {{- $_securityContext := (hasKey $_overrideValues "securityContext" | ternary $_overrideValues.securityContext $.Values.securityContext) }}
+            {{- toYaml $_securityContext | nindent 12 }}
+          image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag | default $.Chart.AppVersion }}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.service.port }}
+              containerPort: {{ $.Values.service.port }}
               protocol: TCP
           # livenessProbe:
           #   httpGet:
@@ -53,26 +71,33 @@ spec:
           #     path: /
           #     port: http
           volumeMounts:
-            {{- if .Values.pvc.enabled }}
-            - mountPath: {{ .Values.config.imageDir }}
+            - mountPath: {{ $item.imageDir }}
               name: sace-data
-            {{- end }}
           envFrom:
             - configMapRef:
-                name: {{ include "sace.fullname" . }}-configmap
+                name: {{ $_saceName }}
             - secretRef:
-                name: {{ include "sace.fullname" . }}-secret
+                name: {{ $_saceName }}
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-      {{- with .Values.nodeSelector }}
+            {{- $_resources := (hasKey $_overrideValues "resources" | ternary $_overrideValues.resources $.Values.resources) }}
+            {{- toYaml $_resources | nindent 12 }}
+      {{- $_nodeSelector := (hasKey $_overrideValues "nodeSelector" | ternary $_overrideValues.nodeSelector $.Values.nodeSelector) }}
+      {{- with $_nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.affinity }}
+      {{- $_affinity := (hasKey $_overrideValues "affinity" | ternary $_overrideValues.affinity $.Values.affinity) }}
+      {{- with $_affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.tolerations }}
+      {{- $_tolerations := (hasKey $_overrideValues "tolerations" | ternary $_overrideValues.tolerations $.Values.tolerations) }}
+      {{- with $_tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+
+{{ if ne (add1 $index) $listLength -}}
+---
+{{- end -}}
+{{- end -}}

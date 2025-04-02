@@ -62,14 +62,15 @@ spec:
             - name: http
               containerPort: {{ $.Values.service.port }}
               protocol: TCP
-          # livenessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: http
-          # readinessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: http
+          livenessProbe:
+            httpGet:
+              path: /sace-web/
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 5
           volumeMounts:
             - mountPath: {{ $item.imageDir }}
               name: sace-data

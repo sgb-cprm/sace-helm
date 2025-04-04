@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: docker.io/edneyego/sace
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
@@ -41,7 +41,7 @@ service:
   port: 8082
 
 ingress:
-  enabled: true
+  enabled: false
   className: ""
   annotations: {}
     # kubernetes.io/ingress.class: nginx
@@ -87,7 +87,9 @@ pvc:
 
 # Array of objects
 configs:
-  - name: Bacia do Branco
+  - name: branco
+    title: Bacia do Branco
+    enabled: true
     # Mandar gerar a partir de ingress
     url: http://sace-web.apps-crc.testing/sace-web
     imageDir: /mnt/sace/data
@@ -111,9 +113,64 @@ configs:
     overrideValues: {}
 
 # Dependencies
+nginx:
+  ingress:
+    enabled: true
+    annotations: {}
+    hosts:
+      - host: sace.apps-crc.testing
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls: []
+    #  - secretName: nginx-unprivileged-tls
+    #    hosts:
+    #      - nginx-unprivileged.apps-crc.testing
+  overrides:
+    conf_d:
+      default: |-
+        {{- $nginx := (include "nginx.fullname" .) -}}
 
-reverseProxy: 
-  enabled: false
+        server {
+            listen       {{ .Values.service.port }};
+            server_name  {{ (mustFirst .Values.ingress.hosts).host }} {{ $nginx }}.{{ .Release.Namespace }}.svc.cluster.local {{ $nginx }};
+
+            #access_log  /var/log/nginx/host.access.log  main;
+
+            location / {
+                root   /usr/share/nginx/html;
+                index  index.html index.htm;
+            }
+
+            #error_page  404              /404.html;
+
+            # redirect server error pages to the static page /50x.html
+            #
+            error_page   500 502 503 504  /50x.html;
+            location = /50x.html { 
+                root   /usr/share/nginx/html;
+            }
+
+            {{- range .Values.selectedConfigs }}
+
+            location /{{ . }}/ {
+                proxy_pass http://{{ (replace "nginx" . $nginx) }}.{{ $.Release.Namespace }}.svc.cluster.local:8082/{{ . }}/;
+                proxy_redirect off;
+
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+            }
+
+            location = /{{ . }} {
+                return 301 $scheme://$host/{{ . }}/;
+            }
+
+            {{- end }}
+          }
+  selectedConfigs:
+    - branco
 
 geoserver: 
   enabled: false

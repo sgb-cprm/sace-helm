@@ -14,6 +14,7 @@ metadata:
     {{- $saceLabels | nindent 4 }}
     sace.sgb.gov.br/bacia: {{ $_saceBacia }}
 data:
+  SACE_CONTEXT: {{ ($item.name | lower | replace " " "-" | replace "_" "-") | quote }}
   JAVA_XMX: {{ $item.jvm.xmx | quote }}
   JAVA_XMS: {{ $item.jvm.xms | quote }}
   workspaceGeoserver: {{ $item.geoserver.workspace | quote }}
@@ -21,7 +22,7 @@ data:
   boundMap: {{ printf "new OpenLayers.Bounds(%f\\,%f\\,%f\\,%f)" $item.bounds.minX $item.bounds.minY $item.bounds.maxX $item.bounds.maxY | quote }}
   ativarAgendamentos: {{ $item.enableScheduling | quote }}
   ativarRecuperacoes: {{ $item.enableRetrieve | quote }}
-  nomeSistema: {{ $item.name | quote }}
+  nomeSistema: {{ $item.title | quote }}
   imageDir: {{ $item.imageDir | quote }}
   urlSistema: {{ $item.url | quote }}
 immutable: false

@@ -19,7 +19,7 @@ data:
   JAVA_XMS: {{ $item.jvm.xms | quote }}
   workspaceGeoserver: {{ $item.geoserver.workspace | quote }}
   urlGeoserver: {{ $item.geoserver.url | quote }}
-  boundMap: {{ printf "new OpenLayers.Bounds(%f\\,%f\\,%f\\,%f)" $item.bounds.minX $item.bounds.minY $item.bounds.maxX $item.bounds.maxY | quote }}
+  boundMap: {{ printf "new OpenLayers.Bounds(%f, %f, %f, %f)" $item.bounds.minX $item.bounds.minY $item.bounds.maxX $item.bounds.maxY | quote }}
   ativarAgendamentos: {{ $item.enableScheduling | quote }}
   ativarRecuperacoes: {{ $item.enableRetrieve | quote }}
   nomeSistema: {{ $item.title | quote }}

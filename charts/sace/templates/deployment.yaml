@@ -64,7 +64,7 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /sace-web/
+              path: /{{ $_saceBacia }}/
               port: http
             initialDelaySeconds: 60
             periodSeconds: 30

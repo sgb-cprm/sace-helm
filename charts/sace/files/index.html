@@ -1,0 +1,23 @@
+{{- $selectedConfigs := .Values.nginx.selectedConfigs -}}
+<html>
+  <head>
+    <title>{{ .Chart.Name}}</title>
+  </head>
+  <body>
+    <h1>SACE is Alive!</a>
+    <h2>Enabled instances: </h2>
+    <ul>
+    {{- range .Values.configs }}
+    {{- if has .name $selectedConfigs }}
+      <li><a href="/{{ .name }}" target="_blank">{{ .title }}</li>
+    {{- end }}
+    {{- end }}
+    </ul>
+    {{- if .Values.geoserver.enabled }}
+    <h2>Geoserver instance</h2>
+    <ul> 
+      <li><a href="/geoserver" target="_blank">Geoserver</a></li>
+    </ul>
+    {{- end }}
+  </body>
+</html>

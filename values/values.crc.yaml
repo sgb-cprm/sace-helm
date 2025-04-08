@@ -1,5 +1,5 @@
 configs:
-  - name: Branco
+  - name: branco
     title: Bacia do Branco
     url: http://sace.sgb-sace-homolog.apps-crc.testing/branco
     imageDir: /mnt/sace/data

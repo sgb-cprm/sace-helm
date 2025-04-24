@@ -112,8 +112,14 @@ nginx:
     #    hosts:
     #      - nginx-unprivileged.apps-crc.testing
   overrides:
-    conf_d:
-      default: |-
+    default: 
+      type: configMap
+      name: sace-nginx-default-conf
+      enabled: true
+    html: 
+      type: configMap
+      name: sace-nginx-html
+      enabled: true
         
   # TODO: Forçar recreate do pod nginx por mudança do configmap https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
   selectedConfigs:

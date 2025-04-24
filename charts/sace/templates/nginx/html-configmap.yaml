@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "sace.fullname" . }}-nginx-html
+  name: {{ .Values.nginx.overrides.html.name | default (printf "%s-nginx-html" ( include "sace.fullname" . )) }}
   labels:
     {{- include "sace.labels" . | nindent 4 }}
 data:

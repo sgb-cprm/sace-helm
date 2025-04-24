@@ -12,7 +12,7 @@
     <h1>SACE is Alive!</a>
     <h2>Enabled instances: </h2>
     <ul>
-    {{- range .Values.configs }}
+    {{- range $selectedConfigs }}
       <li><a href="/{{ .name }}" target="_blank">{{ .title }}</a></li>
     {{- end }}
     </ul>

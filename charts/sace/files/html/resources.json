@@ -1,4 +1,4 @@
 {
-    name: {{ include "sace.fullname" . | quote }},
-    instances: {{ include "sace.selectedInstances" .  | trim }}
+    "name": {{ include "sace.fullname" . | quote }},
+    "instances": {{ include "sace.selectedInstances" .  | trim }}
 }

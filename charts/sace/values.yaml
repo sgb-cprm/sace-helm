@@ -40,21 +40,6 @@ service:
   type: ClusterIP
   port: 8082
 
-ingress:
-  enabled: false
-  className: ""
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: sace-web.apps-crc.testing
-      paths:
-        - path: /sace-web
-          pathType: ImplementationSpecific
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -129,55 +114,8 @@ nginx:
   overrides:
     conf_d:
       default: |-
-        {{- $nginx := (include "nginx.fullname" .) -}}
-
-        server {
-            listen       {{ .Values.service.port }};
-            server_name  {{ (mustFirst .Values.ingress.hosts).host }} {{ $nginx }}.{{ .Release.Namespace }}.svc.cluster.local {{ $nginx }};
-
-            #access_log  /var/log/nginx/host.access.log  main;
-
-            location / {
-                root   /usr/share/nginx/html;
-                index  index.html index.htm;
-            }
-
-            #error_page  404              /404.html;
-
-            # redirect server error pages to the static page /50x.html
-            #
-            error_page   500 502 503 504  /50x.html;
-            location = /50x.html { 
-                root   /usr/share/nginx/html;
-            }
-
-            location /geoserver {
-                proxy_set_header Host $http_host;
-                proxy_set_header X-Real-IP $remote_addr;
-                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                proxy_set_header X-Forwarded-Proto $scheme;
-
-                proxy_pass http://{{ (replace "nginx" "geoserver" $nginx) }}.{{ $.Release.Namespace }}.svc.cluster.local:8080/geoserver;
-            }
-
-            {{- range .Values.selectedConfigs }}
-
-            location /{{ . }}/ {
-                proxy_pass http://{{ (replace "nginx" . $nginx) }}.{{ $.Release.Namespace }}.svc.cluster.local:8082/{{ . }}/;
-                proxy_redirect off;
-
-                proxy_set_header Host $host;
-                proxy_set_header X-Real-IP $remote_addr;
-                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                proxy_set_header X-Forwarded-Proto $scheme;
-            }
-
-            location = /{{ . }} {
-                return 301 $scheme://$host/{{ . }}/;
-            }
-
-            {{- end }}
-          }
+        
+  # TODO: Forçar recreate do pod nginx por mudança do configmap https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
   selectedConfigs:
     - branco
 

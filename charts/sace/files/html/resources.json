@@ -1,0 +1,15 @@
+{{- $selectedConfigs := .Values.nginx.selectedConfigs -}}
+{
+    name: {{ .Chart.Name }}
+    instances: [
+        {{- range .Values.configs }}
+        {{- if has .name $selectedConfigs }}
+        {
+            name: {{ .name }}
+            title: {{ .title }}
+            url: {{ .url }}
+        },
+        {{- end }}
+        {{- end }}
+    ]
+}

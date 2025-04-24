@@ -1,7 +1,12 @@
 {{- $selectedConfigs := .Values.nginx.selectedConfigs -}}
 <html>
   <head>
-    <title>{{ .Chart.Name}}</title>
+    <title>{{ .Chart.Name }}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SACE is alive!">
+    <meta name="keywords" content="SACE, alive, instance">
+    <meta name="author" content="SACE Team">
   </head>
   <body>
     <h1>SACE is Alive!</a>
@@ -9,7 +14,7 @@
     <ul>
     {{- range .Values.configs }}
     {{- if has .name $selectedConfigs }}
-      <li><a href="/{{ .name }}" target="_blank">{{ .title }}</li>
+      <li><a href="/{{ .name }}" target="_blank">{{ .title }}</a></li>
     {{- end }}
     {{- end }}
     </ul>

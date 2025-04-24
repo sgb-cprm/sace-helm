@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "sace.fullname" . }}-nginx-html
+  labels:
+    {{- include "sace.labels" . | nindent 4 }}
+data:
+  index.html: {{ tpl (.Files.Get "files/html/index.html") . | indent 4 | quote }}
+  50x.html: {{ tpl (.Files.Get "files/html/50x.html") . | indent 4 | quote }}
+  404.html: {{ tpl (.Files.Get "files/html/404.html") . | indent 4 | quote }}
+  resources.json: {{ tpl (.Files.Get "files/html/resources.json") . | indent 4 | quote }}

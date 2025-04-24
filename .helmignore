@@ -44,3 +44,6 @@
 .idea/
 *.tmproj
 .vscode/
+
+# Common files to ignore
+draft/

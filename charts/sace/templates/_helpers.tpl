@@ -60,3 +60,17 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Filter selected configs
+*/}}
+{{- define "sace.selectedInstances" -}}
+{{- $selectedConfigs := .Values.nginx.selectedConfigs -}}
+  {{ $newList := list }}
+  {{- range .Values.configs }}
+  {{- if mustHas .name $selectedConfigs }}
+    {{ $newList = append $newList ( dict "name" .name "title" .title "url" .url) }}
+  {{- end }}
+  {{- end }}
+  {{ toJson $newList }}
+{{- end }}

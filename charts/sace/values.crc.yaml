@@ -57,7 +57,11 @@ image:
   pullPolicy: Always
 
 pvc:
-  size: 5Gi
+  enabled: true
+  keep: false
+  storage:
+    className: "crc-csi-hostpath-provisioner"
+    size: 5Gi
 
 replicaCount: 1
 

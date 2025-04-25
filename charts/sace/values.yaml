@@ -67,21 +67,26 @@ tolerations: []
 affinity: {}
 
 pvc:
-  # className: ''
-  size: 100Mi
+  enabled: true
+  keep: true
+  # volumeName: 
+  storage: 
+    className: ""
+    size: 5Gi
+    accessModes:
+      - ReadWriteOnce
 
 # Array of objects
-configs:
-  - name: branco
-    title: Bacia do Branco
-    enabled: true
-    # Mandar gerar a partir de ingress
-    url: http://sace-web.apps-crc.testing/sace-web
+config:
+  default:
+    name: default
+    title: SACE Web
+    url: ""
     imageDir: /mnt/sace/data
     bounds:
-      minX: -65
-      minY: -2
-      maxX: -59
+      minX: -75
+      minY: -35
+      maxX: -35
       maxY: 6
     enableScheduling: false
     enableRetrieve: false
@@ -93,10 +98,12 @@ configs:
       user: postgres
       pass: postgres
     geoserver:
-      workspace: BRANCO
-      url: https://sace.sgb.gov.br/geoserver
-    overrideValues: {}
-
+      workspace: main
+      # url: /geoserver
+  basins: []
+  # TODO: Forçar recreate do pod nginx por mudança do configmap https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
+  selectedBasins: []
+  
 # Dependencies
 nginx:
   ingress:
@@ -120,10 +127,6 @@ nginx:
       type: configMap
       name: sace-nginx-html
       enabled: true
-        
-  # TODO: Forçar recreate do pod nginx por mudança do configmap https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
-  selectedConfigs:
-    - branco
 
 geoserver: 
   enabled: false

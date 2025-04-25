@@ -1,35 +1,51 @@
 {{- $saceName := (include "sace.fullname" .) -}}
 {{- $saceLabels := (include "sace.labels" .) -}}
-{{- $saceConfig := .Values.configs -}}
-{{- $listLength := len $saceConfig -}}
 
-{{- range $index, $item := $saceConfig -}}
-{{- $_saceBacia := ($item.name | lower | replace " " "-" | replace "_" "-") -}}
-{{- $_saceName := (printf "%s-%s" $saceName $_saceBacia) | trunc 63 | trimSuffix "-" -}}
-{{- $_overrideValues := (hasKey $item "overrideValues" | ternary $item.overrideValues dict) -}}
+{{/* Basins */}}
+{{- $saceDefault := .Values.config.default -}}
+{{- $saceBasins := .Values.config.basins -}}
+{{- $saceNumBasins := len $saceBasins -}}
 
+{{/* set default, if basin is empty */}}
+{{- if eq $saceNumBasins 0 -}}
+{{- $saceBasins = list $saceDefault -}}
+{{- $saceNumBasins = 1 -}}
+{{- end -}}
+
+{{- range $index, $item := $saceBasins -}}
+{{- $_saceName := (printf "%s-%s" $saceName $item.name) | lower | replace " " "-" | replace "_" "-" | trunc 63 | trimSuffix "-" -}}
+{{- $_overrideValues := (hasKey $item "overrideValues" | ternary $item.overrideValues (dict "pvc" (dict))) -}}
+{{- $_pvc := merge $_overrideValues.pvc $.Values.pvc }}
+
+{{- if $_pvc.enabled -}}
 apiVersion: v1
 kind: PersistentVolumeClaim
-
+{{- with $_pvc }}
 metadata:
   name: {{ $_saceName }}
   labels:
     {{- $saceLabels | nindent 4 }}
-    sace.sgb.gov.br/bacia: {{ $_saceBacia }}
-spec:
-  accessModes:
-    - ReadWriteOnce
-  volumeMode: Filesystem
-  {{- $_pvc := (hasKey $_overrideValues "pvc" | ternary $_overrideValues.pvc $.Values.pvc) }}
-  {{- with $_pvc }}
-  {{- if .className }}
-  storageClassName: {{ .className }}
+    sace.sgb.gov.br/bacia: {{ $item.name }}
+  {{- if .keep }}
+  annotations:
+    helm.sh/resource-policy: keep
   {{- end }}
+spec:
+  volumeMode: Filesystem
+  {{- if .volumeName }}
+  volumeName: {{ .volumeName | quote }}
+  {{- end }}
+  accessModes:
+    {{- range .storage.accessModes }}
+    - {{ . }}
+    {{- end }}
+  storageClassName: {{ .storage.className | quote }}
   resources:
     requests:
-      storage: {{ .size }}
-  {{- end }}
-{{ if ne (add1 $index) $listLength -}}
+      storage: {{ .storage.size }}
+{{- end }}
+{{- end }}
+{{ if ne (add1 $index) $saceNumBasins -}}
 ---
 {{- end -}}
 {{- end -}}

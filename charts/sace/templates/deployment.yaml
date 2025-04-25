@@ -2,12 +2,20 @@
 {{- $saceName := (include "sace.fullname" .) -}}
 {{- $saceLabels := (include "sace.labels" .) -}}
 {{- $saceSelectorLabels := (include "sace.selectorLabels" .) -}}
-{{- $saceConfig := .Values.configs -}}
-{{- $listLength := len $saceConfig -}}
 
-{{- range $index, $item := $saceConfig -}}
-{{- $_saceBacia := ($item.name | lower | replace " " "-" | replace "_" "-") -}}
-{{- $_saceName := (printf "%s-%s" $saceName $_saceBacia) | trunc 63 | trimSuffix "-" -}}
+{{/* Basins */}}
+{{- $saceDefault := .Values.config.default -}}
+{{- $saceBasins := .Values.config.basins -}}
+{{- $saceNumBasins := len $saceBasins -}}
+
+{{/* set default, if basin is empty */}}
+{{- if eq $saceNumBasins 0 -}}
+{{- $saceBasins = list $saceDefault -}}
+{{- $saceNumBasins = 1 -}}
+{{- end -}}
+
+{{- range $index, $item := $saceBasins -}}
+{{- $_saceName := (printf "%s-%s" $saceName $item.name) | lower | replace " " "-" | replace "_" "-" | trunc 63 | trimSuffix "-" -}}
 {{- $_overrideValues := (hasKey $item "overrideValues" | ternary $item.overrideValues dict) -}}
 
 apiVersion: apps/v1
@@ -16,7 +24,7 @@ metadata:
   name: {{ $_saceName }}
   labels:
     {{- $saceLabels | nindent 4 }}
-    sace.sgb.gov.br/bacia: {{ $_saceBacia }}
+    sace.sgb.gov.br/bacia: {{ $item.name }}
 spec:
   {{- $_hpa := (hasKey $_overrideValues "autoscaling" | ternary $_overrideValues.autoscaling $.Values.autoscaling) }}
   {{- if not $_hpa.enabled }}
@@ -26,7 +34,7 @@ spec:
   selector:
     matchLabels:
       {{- $saceSelectorLabels | nindent 6 }}
-      sace.sgb.gov.br/bacia: {{ $_saceBacia }}
+      sace.sgb.gov.br/bacia: {{ $item.name }}
   template:
     metadata:
       {{- $_podAnnotations := (hasKey $_overrideValues "podAnnotations" | ternary $_overrideValues.podAnnotations $.Values.podAnnotations) }}
@@ -36,7 +44,7 @@ spec:
       {{- end }}
       labels:
         {{- $saceSelectorLabels | nindent 8 }}
-        sace.sgb.gov.br/bacia: {{ $_saceBacia }}
+        sace.sgb.gov.br/bacia: {{ $item.name }}
     spec:
       {{- with $.Values.imagePullSecrets }}
       imagePullSecrets:
@@ -64,7 +72,7 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /{{ $_saceBacia }}/
+              path: /{{ $item.name }}/
               port: http
             initialDelaySeconds: 60
             periodSeconds: 30
@@ -98,7 +106,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
 
-{{ if ne (add1 $index) $listLength -}}
+{{ if ne (add1 $index) $saceNumBasins -}}
 ---
 {{- end -}}
 {{- end -}}

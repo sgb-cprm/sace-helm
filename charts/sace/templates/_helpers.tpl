@@ -62,14 +62,23 @@ Create the name of the service account to use
 {{- end }}
 
 {{/*
+URL Template
+*/}}
+{{- define "sace.urlTemplate" -}}
+{{- $ingress := .Values.nginx.ingress -}}
+{{- printf "%s://%s" (ternary "https" "http" (ne (len $ingress.tls) 0)) ($ingress.hosts | first).host }}
+{{- end }}
+
+{{/*
 Filter selected configs
 */}}
 {{- define "sace.selectedInstances" -}}
-{{- $selectedConfigs := .Values.nginx.selectedConfigs -}}
+{{- $selectedConfigs := .Values.config.selectedBasins -}}
   {{ $newList := list }}
-  {{- range .Values.configs }}
+  {{- range .Values.config.basins }}
   {{- if mustHas .name $selectedConfigs }}
-    {{ $newList = append $newList ( dict "name" .name "title" .title "url" .url) }}
+    {{ $url := printf "%s/%s" (include "sace.urlTemplate" $) .name -}}
+    {{ $newList = append $newList ( dict "name" .name "title" .title "url" ( .url | default $url )) }}
   {{- end }}
   {{- end }}
   {{ toJson $newList }}

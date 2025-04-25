@@ -193,4 +193,9 @@ helm upgrade -f my-values.yaml sace .
 ```
 
 ## Contribuições
+
 Sinta-se à vontade para contribuir com este chart através de pull requests no repositório.
+
+## Licença
+
+Este trabalho é licenciado sob [Creative Commons Attribution-NonCommercial 4.0 International License](https://creativecommons.org/licenses/by-nc/4.0/).

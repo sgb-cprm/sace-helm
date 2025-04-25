@@ -1,0 +1,16 @@
+*.lock
+charts/*/charts
+
+.DS_Store
+
+# geoserver
+docker/geoserver/cluster/kahadb/
+docker/geoserver/cluster/embedded-broker.properties
+docker/geoserver/logs
+
+# Values de deploy em ambientes
+values.homolog.yaml
+values.prod.yaml
+
+docker/
+draft/

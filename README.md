@@ -151,7 +151,7 @@ A tabela abaixo lista os parâmetros configuráveis do chart e seus valores padr
 | `nginx.overrides.html.name`            | `sace-nginx-html`           | Nome do ConfigMap de override HTML do Nginx.                                                                                              |
 | `nginx.overrides.html.enabled`         | `true`                      | Habilita o override HTML do Nginx.                                                                                                          |
 
-Mais detalhes sobre as configurações do chart do Geoserver estão disponíveis em https://github.com/nds-cprm/helm-charts/tree/main/charts/nginx
+Mais detalhes sobre as configurações do chart do `nginx` estão disponíveis em https://github.com/nds-cprm/helm-charts/tree/main/charts/nginx
 
 ## Configurações do GeoServer
 

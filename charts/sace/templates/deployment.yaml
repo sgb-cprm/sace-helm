@@ -37,11 +37,12 @@ spec:
       sace.sgb.gov.br/bacia: {{ $item.name }}
   template:
     metadata:
-      {{- $_podAnnotations := (hasKey $_overrideValues "podAnnotations" | ternary $_overrideValues.podAnnotations $.Values.podAnnotations) }}
-      {{- with $_podAnnotations }}
       annotations:
+        rollme: {{ randAlphaNum 5 | quote }}
+        {{- $_podAnnotations := (hasKey $_overrideValues "podAnnotations" | ternary $_overrideValues.podAnnotations $.Values.podAnnotations) }}
+        {{- with $_podAnnotations }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
       labels:
         {{- $saceSelectorLabels | nindent 8 }}
         sace.sgb.gov.br/bacia: {{ $item.name }}

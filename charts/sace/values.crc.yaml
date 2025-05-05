@@ -15,50 +15,56 @@ config:
   basins:
     - name: branco
       title: Bacia do Branco
-      # url: http://sace.sgb-sace-homolog.apps-crc.testing/branco
-      # imageDir: /mnt/sace/data
+      # url: http://sace.sgb.gov.br/geoserver/branco
+      # imageDir: /opt/sace/data
       bounds:
         minX: -65
         minY: -2
         maxX: -59
         maxY: 6
-      # enableScheduling: true
-      # enableRetrieve: true
+      # jvm:
+      #   xmx: 1024
+      #   xms: 2048
+      # enableScheduling: false
+      # enableRetrieve: false
       db:
+        # pass: sace123
         url: jdbc:postgresql://sace-postgresql.sgb-sace-homolog.svc.cluster.local:5432/sace_branco
       geoserver:
         workspace: BRANCO
-        # url: http://sace.sgb-sace-homolog.apps-crc.testing/geoserver
+        # url: http://sace.sgb.gov.br/geoserver
+      extras: 
+        x: z
       overrideValues:
-        # replicaCount: 2
-        # autoscaling:
-        #   enabled: true
-        pvc:
-          # className: thin-csi
-          storage:
-            size: 15Mi
+        autoscaling:
+          enabled: true
+        # pvc:
+        #   volumeName: branco_pv
+        #   storage:
+        #     className: nfs-client-delete
+        #     size: 15Mi
 
     - name: araguaia
       title: Bacia do Araguaia
       # url: http://sace.sgb-sace-homolog.apps-crc.testing/araguaia
       # imageDir: /mnt/sace/data
       bounds:
-        minX: -65
-        minY: -2
-        maxX: -59
-        maxY: 6
+        minX: -23
+        minY: -23
+        maxX: -58
+        maxY: -12
       db:
         url: jdbc:postgresql://sace-postgresql.sgb-sace-homolog.svc.cluster.local:5432/sace_araguaia
       geoserver:
         workspace: ARAGUAIA
         # url: http://sace.sgb-sace-homolog.apps-crc.testing/geoserver
       overrideValues:
-        # replicaCount: 2
         # autoscaling:
         #   enabled: true
         pvc:
-          # className: thin-csi
+          # volumeName: araguaia_pv
           storage:
+            # className: thin-csi
             size: 10Mi
   selectedBasins:
     - branco

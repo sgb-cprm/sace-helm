@@ -13,30 +13,29 @@
 {{- end -}}
 
 {{- range $index, $item := $saceBasins }}
-{{- $_saceName := (printf "%s-%s" $saceName $item.name) | lower | replace " " "-" | replace "_" "-" | trunc 63 | trimSuffix "-" -}}
+{{- $_saceProps := mergeOverwrite (deepCopy $saceDefault) $item -}}
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ $_saceName }}
+  name: {{ (printf "%s-%s" $saceName $_saceProps.name) | lower | replace " " "-" | replace "_" "-" | trunc 63 | trimSuffix "-" }}
   labels:
     {{- $saceLabels | nindent 4 }}
-    sace.sgb.gov.br/bacia: {{ $item.name }}
+    sace.sgb.gov.br/bacia: {{ $_saceProps.name }}
 data:
-  SACE_CONTEXT: {{ $item.name | quote }}
-  {{- $jvm := $item.jvm | default dict }}
-  JAVA_XMX: {{ hasKey $jvm "xmx" | ternary $jvm.xmx $saceDefault.jvm.xmx | quote }}
-  JAVA_XMS: {{ hasKey $jvm "xms" | ternary $jvm.xms $saceDefault.jvm.xms | quote }}
-  {{- $geoserver := $item.geoserver | default dict }}
-  workspaceGeoserver: {{ hasKey $geoserver "workspace" | ternary $geoserver.workspace $saceDefault.geoserver.workspace | quote }}
-  urlGeoserver: {{ hasKey $geoserver "url" | ternary $geoserver.url $saceDefault.geoserver.url | quote }}
-  {{- $bounds := $item.bounds | default $saceDefault.bounds }}
+  SACE_CONTEXT: {{ $_saceProps.name | quote }}
+  JAVA_XMX: {{ $_saceProps.jvm.xmx | quote }}
+  JAVA_XMS: {{ $_saceProps.jvm.xms | quote }}
+  workspaceGeoserver: {{ $_saceProps.geoserver.workspace | quote }}
+  urlGeoserver: {{ $_saceProps.geoserver.url | quote }}
+  {{- $bounds := $_saceProps.bounds }}
   boundMap: {{ printf "new OpenLayers.Bounds(%f, %f, %f, %f)" $bounds.minX $bounds.minY $bounds.maxX $bounds.maxY | quote }}
-  ativarAgendamentos: {{ $item.enableScheduling | default $saceDefault.enableScheduling | quote }}
-  ativarRecuperacoes: {{ $item.enableRetrieve | default $saceDefault.enableRetrieve | quote }}
-  nomeSistema: {{ $item.title | default $saceDefault.title | quote }}
-  imageDir: {{ $item.imageDir | default $saceDefault.imageDir | quote }}
-  {{- $url := printf "%s/%s" (include "sace.urlTemplate" $) $item.name }}
-  urlSistema: {{ $item.url | default $url | quote }}
+  ativarAgendamentos: {{ $_saceProps.enableScheduling | quote }}
+  ativarRecuperacoes: {{ $_saceProps.enableRetrieve | quote }}
+  nomeSistema: {{ $_saceProps.title | quote }}
+  imageDir: {{ $_saceProps.imageDir | quote }}
+  {{- $url := printf "%s/%s" (include "sace.urlTemplate" $) $_saceProps.name }}
+  urlSistema: {{ $_saceProps.url | default $url | quote }}
 immutable: false
 {{ if ne (add1 $index) $saceNumBasins -}}
 ---

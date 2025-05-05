@@ -3,6 +3,28 @@ entries:
   sace:
   - apiVersion: v2
     appVersion: latest
+    created: "2025-05-05T14:38:02.118994969Z"
+    dependencies:
+    - name: nginx
+      repository: https://nds-cprm.github.io/helm-charts
+      version: 0.3.1
+    - condition: geoserver.enabled
+      name: geoserver
+      repository: https://nds-cprm.github.io/helm-charts
+      version: 0.5.7
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 15.2.4
+    description: SACE - Monitoramento de bacias hidrográficas
+    digest: 1969ec4da10479870aedfa9569b281b9c2ecac86951f779dd1fbabdc087fa4a9
+    name: sace
+    type: application
+    urls:
+    - https://github.com/sgb-cprm/sace-helm/releases/download/sace-0.5.0/sace-0.5.0.tgz
+    version: 0.5.0
+  - apiVersion: v2
+    appVersion: latest
     created: "2025-04-29T17:43:44.044215763Z"
     dependencies:
     - name: nginx
@@ -45,4 +67,4 @@ entries:
     urls:
     - https://github.com/sgb-cprm/sace-helm/releases/download/sace-0.4.0/sace-0.4.0.tgz
     version: 0.4.0
-generated: "2025-04-29T17:43:44.044226192Z"
+generated: "2025-05-05T14:38:02.119007492Z"

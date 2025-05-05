@@ -15,18 +15,20 @@
 {{- end -}}
 
 {{- range $index, $item := $saceBasins -}}
-{{- $_saceName := (printf "%s-%s" $saceName $item.name) | lower | replace " " "-" | replace "_" "-" | trunc 63 | trimSuffix "-" -}}
-{{- $_overrideValues := (hasKey $item "overrideValues" | ternary $item.overrideValues dict) -}}
+{{- $_saceProps := mergeOverwrite (deepCopy $saceDefault) $item -}}
+{{- $_overrideValues := (hasKey $_saceProps "overrideValues" | ternary $_saceProps.overrideValues dict) -}}
 
+{{- $_saceName := (printf "%s-%s" $saceName $_saceProps.name) | lower | replace " " "-" | replace "_" "-" | trunc 63 | trimSuffix "-" -}}
 apiVersion: apps/v1
 kind: Deployment
-metadata:
+metadata:  
   name: {{ $_saceName }}
   labels:
     {{- $saceLabels | nindent 4 }}
-    sace.sgb.gov.br/bacia: {{ $item.name }}
+    sace.sgb.gov.br/bacia: {{ $_saceProps.name }}
 spec:
-  {{- $_hpa := (hasKey $_overrideValues "autoscaling" | ternary $_overrideValues.autoscaling $.Values.autoscaling) }}
+  {{- if not (hasKey $_overrideValues "autoscaling") -}}{{- $_ := set $_overrideValues "autoscaling" dict -}}{{- end -}}
+  {{- $_hpa := mergeOverwrite (deepCopy $.Values.autoscaling) $_overrideValues.autoscaling -}}
   {{- if not $_hpa.enabled }}
   {{- $_replicaCount := (hasKey $_overrideValues "replicaCount" | ternary $_overrideValues.replicaCount $.Values.replicaCount) }}
   replicas: {{ $_replicaCount }}
@@ -34,27 +36,31 @@ spec:
   selector:
     matchLabels:
       {{- $saceSelectorLabels | nindent 6 }}
-      sace.sgb.gov.br/bacia: {{ $item.name }}
+      sace.sgb.gov.br/bacia: {{ $_saceProps.name }}
   template:
     metadata:
       annotations:
         rollme: {{ randAlphaNum 5 | quote }}
-        {{- $_podAnnotations := (hasKey $_overrideValues "podAnnotations" | ternary $_overrideValues.podAnnotations $.Values.podAnnotations) }}
+        {{- if not (hasKey $_overrideValues "podAnnotations") -}}{{- $_ := set $_overrideValues "podAnnotations" dict -}}{{- end -}}
+        {{- $_podAnnotations := mergeOverwrite (deepCopy $.Values.podAnnotations) $_overrideValues.podAnnotations -}}
         {{- with $_podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       labels:
         {{- $saceSelectorLabels | nindent 8 }}
-        sace.sgb.gov.br/bacia: {{ $item.name }}
+        sace.sgb.gov.br/bacia: {{ $_saceProps.name }}
     spec:
       {{- with $.Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ $saceServiceAccount }}
-      {{- $_podSecurityContext := (hasKey $_overrideValues "podSecurityContext" | ternary $_overrideValues.podSecurityContext $.Values.podSecurityContext) }}
+      {{- if not (hasKey $_overrideValues "podSecurityContext") -}}{{- $_ := set $_overrideValues "podSecurityContext" dict -}}{{- end -}}
+      {{- $_podSecurityContext := mergeOverwrite (deepCopy $.Values.podSecurityContext) $_overrideValues.podSecurityContext -}}
+      {{ with $_podSecurityContext }}
       securityContext:
-        {{- toYaml $.Values.podSecurityContext | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       restartPolicy: Always
       volumes:
         - name: sace-data
@@ -62,9 +68,12 @@ spec:
             claimName: {{ $_saceName }}
       containers:
         - name: {{ $.Chart.Name }}
-          securityContext:
-            {{- $_securityContext := (hasKey $_overrideValues "securityContext" | ternary $_overrideValues.securityContext $.Values.securityContext) }}
-            {{- toYaml $_securityContext | nindent 12 }}
+          {{- if not (hasKey $_overrideValues "securityContext") -}}{{- $_ := set $_overrideValues "securityContext" dict -}}{{- end -}}
+          {{- $_securityContext := mergeOverwrite (deepCopy $.Values.securityContext) $_overrideValues.securityContext -}}
+          {{ with $_securityContext }}
+          securityContext:            
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag | default $.Chart.AppVersion }}"
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
           ports:
@@ -73,7 +82,7 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /{{ $item.name }}/
+              path: /{{ $_saceProps.name }}/
               port: http
             initialDelaySeconds: 60
             periodSeconds: 30
@@ -81,27 +90,33 @@ spec:
             successThreshold: 1
             failureThreshold: 5
           volumeMounts:
-            - mountPath: {{ $item.imageDir }}
+            - mountPath: {{ $_saceProps.imageDir }}
               name: sace-data
           envFrom:
             - configMapRef:
                 name: {{ $_saceName }}
             - secretRef:
                 name: {{ $_saceName }}
+          {{- if not (hasKey $_overrideValues "resources") -}}{{- $_ := set $_overrideValues "resources" dict -}}{{- end -}}
+          {{- $_resources := mergeOverwrite (deepCopy $.Values.resources) $_overrideValues.resources -}}
+          {{ with $_resources }}
           resources:
-            {{- $_resources := (hasKey $_overrideValues "resources" | ternary $_overrideValues.resources $.Values.resources) }}
-            {{- toYaml $_resources | nindent 12 }}
-      {{- $_nodeSelector := (hasKey $_overrideValues "nodeSelector" | ternary $_overrideValues.nodeSelector $.Values.nodeSelector) }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- if not (hasKey $_overrideValues "nodeSelector") -}}{{- $_ := set $_overrideValues "nodeSelector" dict -}}{{- end -}}
+      {{- $_nodeSelector := mergeOverwrite (deepCopy $.Values.nodeSelector) $_overrideValues.nodeSelector -}}
       {{- with $_nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- $_affinity := (hasKey $_overrideValues "affinity" | ternary $_overrideValues.affinity $.Values.affinity) }}
+      {{- if not (hasKey $_overrideValues "affinity") -}}{{- $_ := set $_overrideValues "affinity" dict -}}{{- end -}}
+      {{- $_affinity := mergeOverwrite (deepCopy $.Values.affinity) $_overrideValues.affinity -}}
       {{- with $_affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- $_tolerations := (hasKey $_overrideValues "tolerations" | ternary $_overrideValues.tolerations $.Values.tolerations) }}
+      {{- if not (hasKey $_overrideValues "tolerations") -}}{{- $_ := set $_overrideValues "tolerations" list -}}{{- end -}}
+      {{- $_tolerations := uniq (concat (deepCopy $.Values.tolerations) $_overrideValues.tolerations) -}}
       {{- with $_tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}

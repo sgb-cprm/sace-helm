@@ -13,11 +13,15 @@
 {{- end -}}
 
 {{- range $index, $item := $saceBasins -}}
-{{- $_saceName := (printf "%s-%s" $saceName $item.name) | lower | replace " " "-" | replace "_" "-" | trunc 63 | trimSuffix "-" -}}
-{{- $_overrideValues := (hasKey $item "overrideValues" | ternary $item.overrideValues (dict "pvc" (dict))) -}}
-{{- $_pvc := merge $_overrideValues.pvc $.Values.pvc }}
+{{- $_saceProps := mergeOverwrite (deepCopy $saceDefault) $item -}}
+{{- $_overrideValues := (hasKey $_saceProps "overrideValues" | ternary $_saceProps.overrideValues dict) -}}
+
+{{/* Get only pvc values */}}
+{{- if not (hasKey $_overrideValues "pvc") -}}{{- $_ := set $_overrideValues "pvc" dict -}}{{- end -}}
+{{- $_pvc := mergeOverwrite (deepCopy $.Values.pvc) $_overrideValues.pvc -}}
 
 {{- if $_pvc.enabled -}}
+{{- $_saceName := (printf "%s-%s" $saceName $item.name) | lower | replace " " "-" | replace "_" "-" | trunc 63 | trimSuffix "-" -}}
 apiVersion: v1
 kind: PersistentVolumeClaim
 {{- with $_pvc }}
@@ -25,7 +29,7 @@ metadata:
   name: {{ $_saceName }}
   labels:
     {{- $saceLabels | nindent 4 }}
-    sace.sgb.gov.br/bacia: {{ $item.name }}
+    sace.sgb.gov.br/bacia: {{ $_saceProps.name }}
   {{- if .keep }}
   annotations:
     helm.sh/resource-policy: keep

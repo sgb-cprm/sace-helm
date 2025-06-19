@@ -60,6 +60,12 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
+extraHosts: []
+  # - ip: 127.0.0.1
+  #   hostnames:
+  #     - localhost.localdomain
+  #     - localhost
+
 nodeSelector: {}
 
 tolerations: []

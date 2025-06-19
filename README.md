@@ -93,6 +93,14 @@ A tabela abaixo lista os parâmetros configuráveis do chart e seus valores padr
 | `autoscaling.targetCPUUtilizationPercentage` | `80`                     | Percentual alvo de utilização da CPU para o auto scaling.              |
 | `autoscaling.targetMemoryUtilizationPercentage` | `# 80`                   | Percentual alvo de utilização da memória (atualmente comentado). |
 
+## Configurações de entradas em /etc/hosts
+
+| Chave                                    | Valor Padrão             | Descrição                                                                 |
+| ---------------------------------------- | ------------------------ | ------------------------------------------------------------------------- |
+| `extraHosts`                             | []                       | Lista de entradas extras para o /etc/hosts do pod.                        |
+| `extraHosts[].ip`                        | `127.0.0.1`              | IP para o qual os hostnames vão solver.                                   |
+| `extraHosts[].hostnames`                 | `['localhost', 'localhost.localdomain']` | Lista de hostnames referentes ao ip acima.                |
+
 ## Configurações do Volume Persistente (PVC)
 
 | Chave                   | Valor Padrão      | Descrição                                                                 |

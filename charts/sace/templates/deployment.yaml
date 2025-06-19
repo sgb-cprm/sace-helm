@@ -65,7 +65,11 @@ spec:
       volumes:
         - name: sace-data
           persistentVolumeClaim:
-            claimName: {{ $_saceName }}
+            claimName: {{ $_saceName }}      
+      {{- with .Values.extraHosts }}
+      hostAliases:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ $.Chart.Name }}
           {{- if not (hasKey $_overrideValues "securityContext") -}}{{- $_ := set $_overrideValues "securityContext" dict -}}{{- end -}}

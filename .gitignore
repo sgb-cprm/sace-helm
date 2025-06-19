@@ -11,3 +11,6 @@ docker/geoserver/logs
 # Values de deploy em ambientes
 values.homolog.yaml
 values.prod.yaml
+
+# dump dos arquivos de template
+manifest.yaml

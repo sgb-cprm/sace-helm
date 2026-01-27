@@ -65,7 +65,10 @@ spec:
       volumes:
         - name: sace-data
           persistentVolumeClaim:
-            claimName: {{ $_saceName }}      
+            claimName: {{ $_saceName }}
+        {{- with $.Values.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- with $.Values.extraHosts }}
       hostAliases:
         {{- toYaml . | nindent 8 }}
@@ -96,6 +99,9 @@ spec:
           volumeMounts:
             - mountPath: {{ $_saceProps.imageDir }}
               name: sace-data
+            {{- with $.Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           envFrom:
             - configMapRef:
                 name: {{ $_saceName }}

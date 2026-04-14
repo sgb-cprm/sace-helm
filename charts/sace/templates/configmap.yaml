@@ -33,7 +33,8 @@ data:
   ativarAgendamentos: {{ $_saceProps.enableScheduling | quote }}
   ativarRecuperacoes: {{ $_saceProps.enableRetrieve | quote }}
   nomeSistema: {{ $_saceProps.title | quote }}
-  imageDir: {{ $_saceProps.imageDir | quote }}
+  imageDir: {{ printf "%s/images" $_saceProps.persistence }}
+  geojsonDir: {{ printf "%s/geojson" $_saceProps.persistence }}
   {{- $url := printf "%s/%s" (include "sace.urlTemplate" $) $_saceProps.name }}
   urlSistema: {{ $_saceProps.url | default $url | quote }}
 immutable: false

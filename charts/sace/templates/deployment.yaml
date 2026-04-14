@@ -97,7 +97,7 @@ spec:
             successThreshold: 1
             failureThreshold: 5
           volumeMounts:
-            - mountPath: {{ $_saceProps.imageDir }}
+            - mountPath: {{ $_saceProps.persistence }}
               name: sace-data
             {{- with $.Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}

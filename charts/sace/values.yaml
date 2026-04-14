@@ -101,7 +101,7 @@ config:
     name: default
     title: SACE Web
     url: ""
-    imageDir: /mnt/sace/data
+    persistence: /mnt/sace/data
     bounds:
       minX: -75
       minY: -35

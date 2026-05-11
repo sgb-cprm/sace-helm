@@ -102,6 +102,7 @@ config:
     title: SACE Web
     url: ""
     persistence: /mnt/sace/data
+    wmsConfigJson: ""
     bounds:
       minX: -75
       minY: -35

@@ -35,6 +35,7 @@ data:
   nomeSistema: {{ $_saceProps.title | quote }}
   imageDir: {{ printf "%s/images" $_saceProps.persistence }}
   geojsonDir: {{ printf "%s/geojson" $_saceProps.persistence }}
+  wmsConfigJson: {{ $_saceProps.wmsConfigJson | quote }}
   {{- $url := printf "%s/%s" (include "sace.urlTemplate" $) $_saceProps.name }}
   urlSistema: {{ $_saceProps.url | default $url | quote }}
 immutable: false

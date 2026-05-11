@@ -69,6 +69,11 @@ spec:
         {{- with $.Values.volumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+        {{- if hasKey $_overrideValues "volumes" }}
+        {{- with $_overrideValues.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- end }}
       {{- with $.Values.extraHosts }}
       hostAliases:
         {{- toYaml . | nindent 8 }}
@@ -101,6 +106,11 @@ spec:
               name: sace-data
             {{- with $.Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- if hasKey $_overrideValues "volumeMounts" -}}
+            {{- with $_overrideValues.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
             {{- end }}
           envFrom:
             - configMapRef:

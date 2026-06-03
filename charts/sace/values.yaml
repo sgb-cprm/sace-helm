@@ -103,6 +103,10 @@ config:
     url: ""
     persistence: /mnt/sace/data
     wmsConfigJson: ""
+    javaOpts: ""
+    kafkaBootstrapServers: "kafka:9092"
+    kafkaTopico: "medicoes"
+    mailHost: "localhost"
     bounds:
       minX: -75
       minY: -35

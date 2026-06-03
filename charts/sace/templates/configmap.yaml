@@ -34,7 +34,12 @@ data:
   ativarRecuperacoes: {{ $_saceProps.enableRetrieve | quote }}
   nomeSistema: {{ $_saceProps.title | quote }}
   imageDir: {{ printf "%s/images" $_saceProps.persistence }}
-  geojsonDir: {{ printf "%s/geojson" $_saceProps.persistence }}
+  ftpDir: {{ printf "%s/ftp" $_saceProps.persistence }}
+  urlDir: {{ printf "%s/url" $_saceProps.persistence }}
+  JAVA_OPTS: {{ $_saceProps.javaOpts | quote }}
+  kafkaBootstrapServers: {{ $_saceProps.kafkaBootstrapServers | quote }}
+  kafkaTopico: {{ $_saceProps.kafkaTopico | quote }}
+  mailHost: {{ $_saceProps.mailHost | quote }}
   wmsConfigJson: {{ $_saceProps.wmsConfigJson | quote }}
   {{- $url := printf "%s/%s" (include "sace.urlTemplate" $) $_saceProps.name }}
   urlSistema: {{ $_saceProps.url | default $url | quote }}

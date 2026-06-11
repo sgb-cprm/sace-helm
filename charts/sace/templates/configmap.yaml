@@ -26,8 +26,8 @@ data:
   SACE_CONTEXT: {{ $_saceProps.name | quote }}
   JAVA_XMX: {{ $_saceProps.jvm.xmx | quote }}
   JAVA_XMS: {{ $_saceProps.jvm.xms | quote }}
-  USER_TIMEZONE: {{ $_saceProps.timezone | quote }}
-  TZ: {{ $_saceProps.timezone | quote }}
+  workspaceGeoserver: {{ $_saceProps.geoserver.workspace | quote }}
+  urlGeoserver: {{ $_saceProps.geoserver.url | quote }}
   {{- $bounds := $_saceProps.bounds }}
   boundMap: {{ printf "new OpenLayers.Bounds(%f, %f, %f, %f)" $bounds.minX $bounds.minY $bounds.maxX $bounds.maxY | quote }}
   ativarAgendamentos: {{ $_saceProps.enableScheduling | quote }}

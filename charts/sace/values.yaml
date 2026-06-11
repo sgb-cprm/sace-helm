@@ -117,7 +117,9 @@ config:
       url: jdbc:postgresql://postgresdb:5432/sace
       user: postgres
       pass: postgres
-    timezone: America/Sao_Paulo
+    geoserver:
+      workspace: main
+      # url: /geoserver
   basins: []
   # TODO: Forçar recreate do pod nginx por mudança do configmap https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
   selectedBasins: []

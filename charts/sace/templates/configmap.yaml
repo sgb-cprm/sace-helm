@@ -26,6 +26,10 @@ data:
   SACE_CONTEXT: {{ $_saceProps.name | quote }}
   JAVA_XMX: {{ $_saceProps.jvm.xmx | quote }}
   JAVA_XMS: {{ $_saceProps.jvm.xms | quote }}
+  {{- if $_saceProps.timezone }}
+  USER_TIMEZONE: {{ $_saceProps.timezone | quote }}
+  TZ: {{ $_saceProps.timezone | quote }}
+  {{- end }}
   workspaceGeoserver: {{ $_saceProps.geoserver.workspace | quote }}
   urlGeoserver: {{ $_saceProps.geoserver.url | quote }}
   {{- $bounds := $_saceProps.bounds }}

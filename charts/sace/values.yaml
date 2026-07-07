@@ -119,7 +119,8 @@ config:
       pass: postgres
     geoserver:
       workspace: main
-      # url: /geoserver
+      # url: /geoserver    
+    timezone: ""
   basins: []
   # TODO: Forçar recreate do pod nginx por mudança do configmap https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
   selectedBasins: []

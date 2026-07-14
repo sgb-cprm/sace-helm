@@ -9,10 +9,12 @@ docker/geoserver/cluster/embedded-broker.properties
 docker/geoserver/logs
 
 # Values de deploy em ambientes
-values.*.yaml
+**/values.*.yaml
+**/values.*.yml
 
 # dump dos arquivos de template
-manifest.yaml
+**/manifest.yaml
+**/manifest.yml
 
 # rascunho
 draft/

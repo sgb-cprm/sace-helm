@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-resources" ( include "sace.fullname" . ) }}
+  labels:
+    {{- include "sace.labels" . | nindent 4 }}
+data:
+  resources.json: {{ tpl (.Files.Get "files/nginx/html/resources.json") . | indent 4 | quote }}

@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-entrypoint" ( include "sace.fullname" . ) }}
+  labels:
+    {{- include "sace.labels" . | nindent 4 }}
+data:
+  99-update-default-server.sh: {{ tpl (.Files.Get "files/nginx/entrypoint.d/99-update-default-server.sh") . | indent 4 | quote }}

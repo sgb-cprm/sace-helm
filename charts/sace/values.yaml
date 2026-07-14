@@ -120,7 +120,7 @@ config:
     geoserver:
       workspace: main
       # url: /geoserver    
-    timezone: ""
+    timezone: "UTC"
   basins: []
   # TODO: Forçar recreate do pod nginx por mudança do configmap https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
   selectedBasins: []
@@ -139,15 +139,15 @@ nginx:
     #  - secretName: nginx-unprivileged-tls
     #    hosts:
     #      - nginx-unprivileged.apps-crc.testing
-  overrides:
-    default: 
-      type: configMap
-      name: sace-nginx-default-conf
-      enabled: true
-    html: 
-      type: configMap
-      name: sace-nginx-html
-      enabled: true
+  # overrides:
+  #   default: 
+  #     type: configMap
+  #     name: sace-nginx-default-conf
+  #     enabled: true
+  #   html: 
+  #     type: configMap
+  #     name: sace-nginx-html
+  #     enabled: true
 
 geoserver: 
   enabled: false

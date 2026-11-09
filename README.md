@@ -51,7 +51,7 @@ A tabela abaixo lista os parâmetros configuráveis do chart e seus valores padr
 
 | Chave             | Valor Padrão             | Descrição                                               |
 | ----------------- | ------------------------ | ------------------------------------------------------- |
-| `image.repository`| `docker.io/edneyego/sace` | Repositório da imagem Docker.                           |
+| `image.repository`| `docker.io/cprm/sace`    | Repositório da imagem Docker.                           |
 | `image.pullPolicy`| `IfNotPresent`           | Política de pull da imagem Docker.                      |
 | `image.tag`       | `""`                     | Tag da imagem Docker (sobrescreve a appVersion).        |
 | `imagePullSecrets`| `[]`                     | Segredos para pull de imagens de repositórios privados. |
@@ -69,8 +69,8 @@ A tabela abaixo lista os parâmetros configuráveis do chart e seus valores padr
 | Chave                 | Valor Padrão             | Descrição                                          |
 | --------------------- | ------------------------ | ---------------------------------------------------- |
 | `podAnnotations`      | `{}`                     | Anotações a serem adicionadas aos pods.              |
-| `podSecurityContext`  | `{}` (`# fsGroup: 2000`) | Contexto de segurança do pod.                        |
-| `securityContext`     | `{}` (`# capabilities: ...`, `# readOnlyRootFilesystem: ...`, `# runAsNonRoot: ...`, `# runAsUser: ...`) | Contexto de segurança dos containers.                    |
+| `podSecurityContext`  | `seccompProfile.type: RuntimeDefault` | Contexto de segurança do pod (compatível com SCC `restricted-v2`).        |
+| `securityContext`     | `allowPrivilegeEscalation: false`, `capabilities.drop: [ALL]`, `runAsNonRoot: true` | Contexto de segurança dos containers. |
 | `nodeSelector`        | `{}`                     | Seletor de nós para agendamento de pods.             |
 | `tolerations`         | `[]`                     | Tolerâncias para taint nodes.                         |
 | `affinity`            | `{}`                     | Regras de afinidade e anti-afinidade para pods.       |
@@ -80,7 +80,8 @@ A tabela abaixo lista os parâmetros configuráveis do chart e seus valores padr
 | Chave         | Valor Padrão | Descrição                         |
 | ------------- | ------------ | --------------------------------- |
 | `service.type`| `ClusterIP`  | Tipo do serviço Kubernetes.       |
-| `service.port`| `8082`       | Porta do serviço Kubernetes.      |
+| `service.port`| `8080`       | Porta do serviço Kubernetes.      |
+| `containerPort`| `8080`      | Porta em que o SACE escuta no container (deve casar com `server.port` e o `EXPOSE` da imagem). |
 
 ## Configurações de Recursos e Auto Scaling
 
@@ -115,14 +116,24 @@ A tabela abaixo lista os parâmetros configuráveis do chart e seus valores padr
 
 | Chave                             | Valor Padrão                                             | Descrição                                                                                                                               |
 | --------------------------------- | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `config.default.name`             | `default`                                                | Nome da configuração padrão do SACE.                                                                                                      |
+| `config.default.name`             | `default`                                                | Nome da configuração padrão do SACE (também usado como context path `/<name>`).                                                          |
 | `config.default.title`            | `SACE Web`                                               | Título da interface web do SACE.                                                                                                        |
-| `config.default.url`              | `""`                                                     | URL base da aplicação SACE.                                                                                                             |
-| `config.default.imageDir`         | `/mnt/sace/data`                                         | Diretório para imagens dentro do container SACE.                                                                                          |
-| `config.default.bounds.minX`      | `-75`                                                    | Limite mínimo da coordenada X, em graus decimais.                                                                                                            |
-| `config.default.bounds.minY`      | `-35`                                                    | Limite mínimo da coordenada Y, em graus decimais.                                                                                                            |
-| `config.default.bounds.maxX`      | `-35`                                                    | Limite máximo da coordenada X, em graus decimais.                                                                                                            |
-| `config.default.bounds.maxY`      | `6`                                                      | Limite máximo da coordenada Y, em graus decimais.                                                                                                             |
+| `config.default.url`              | `""`                                                     | URL base da aplicação SACE. Se vazio, usa `http://<host-ingress>/<name>`.                                                               |
+| `config.default.persistence`      | `/mnt/sace/data`                                         | Diretório do PVC com dados persistidos (imagens, FTP, URL e GeoJSON).                                                                  |
+| `config.default.timezone`         | `America/Sao_Paulo`                                      | Timezone da JVM (`USER_TIMEZONE`).                                                                                                       |
+| `config.default.geojsonDir`       | `""`                                                     | Diretório de GeoJSON. Se vazio, usa `<persistence>/geojson`.                                                                            |
+| `config.default.wmsConfigJson`    | `""`                                                     | Caminho do `wms-layers-config.json`. Se vazio, usa `/opt/sace/config/wms/wms-layers-config-<name>.json`.                                |
+| `config.default.javaOpts`         | `""`                                                     | Opções extras da JVM (`JAVA_OPTS`).                                                                                                      |
+| `config.default.kafkaBootstrapServers` | `kafka:9092`                                        | Endereço do Kafka.                                                                                                                       |
+| `config.default.kafkaTopico`      | `medicoes`                                               | Tópico de medições.                                                                                                                      |
+| `config.default.kafkaPrevisoes.topico` | `previsoes`                                         | Tópico de previsões.                                                                                                                     |
+| `config.default.kafkaPrevisoes.habilitado` | `false`                                          | Habilita consumo de previsões.                                                                                                           |
+| `config.default.forecastManager.habilitado` | `false`                                          | Habilita integração com o Forecast Manager.                                                                                              |
+| `config.default.forecastManager.url` | `http://localhost:8000`                               | URL do Forecast Manager.                                                                                                                 |
+| `config.default.forecastManager.clientId` | `""`                                             | Client ID do Forecast Manager.                                                                                                           |
+| `config.default.forecastManager.clientSecret` | `""`                                         | Client Secret do Forecast Manager.                                                                                                       |
+| `config.default.forecastManager.timeoutMs` | `3000`                                            | Timeout (ms) do Forecast Manager.                                                                                                        |
+| `config.default.mailHost`         | `localhost`                                              | Host SMTP.                                                                                                                               |
 | `config.default.enableScheduling`  | `false`                                                  | Habilita o agendamento de tarefas no SACE.                                                                                                |
 | `config.default.enableRetrieve`    | `false`                                                  | Habilita a função de recuperação de dados no SACE.                                                                                          |
 | `config.default.jvm.xmx`           | `3096`                                                   | Tamanho máximo de memória para a JVM do SACE (em MB).                                                                                      |
@@ -130,8 +141,6 @@ A tabela abaixo lista os parâmetros configuráveis do chart e seus valores padr
 | `config.default.db.url`            | `jdbc:postgresql://postgresdb:5432/sace`                 | URL de conexão com o banco de dados PostgreSQL do SACE.                                                                     |
 | `config.default.db.user`           | `postgres`                                               | Usuário do banco de dados PostgreSQL do SACE.                                                                                              |
 | `config.default.db.pass`           | `postgres`                                               | Senha do banco de dados PostgreSQL do SACE.                                                                                              |
-| `config.default.geoserver.workspace`| `main`                                                   | Workspace padrão do GeoServer.                                                                                                            |
-| `config.default.geoserver.url`    | `/geoserver`                                           | URL do GeoServer.                                                                                                     |
 
 
 
@@ -189,6 +198,14 @@ Você pode referenciar o arquivo [values.yaml](https://github.com/sgb-cprm/sace-
 ## Uso
 
 Após a instalação, você pode acessar o Nginx através do serviço Kubernetes exposto na porta `8080` dentro do cluster. Se o Ingress estiver habilitado e configurado, você poderá acessar o Nginx através do hostname definido em `ingress.hosts`.
+
+## OpenShift
+
+- A imagem do SACE já roda com `USER 1001:0` e permissões de grupo (GID 0), compatíveis com o SCC `restricted-v2` do OpenShift.
+- Cada Deployment recebe `SERVER_SERVLET_CONTEXT_PATH=/<bacia>` (via ConfigMap), então a aplicação responde em `/<bacia>/` — o mesmo comportamento da versão Jetty, em que cada WAR subia em `/<bacia>`. Os probes e o Nginx usam esse mesmo caminho.
+- O PVC é montado em `config.default.persistence`. O OpenShift injeta `fsGroup` automaticamente; em Kubernetes sem SCC, defina `podSecurityContext.fsGroup` para garantir escrita em `/mnt/sace/data`.
+- O ConfigMap inclui `geojsonDir=<persistence>/geojson` e `wmsConfigJson` apontando para o arquivo embarcado na imagem (`/opt/sace/config/wms/wms-layers-config-<bacia>.json`) quando não sobrescrito.
+- `/app/logs` é montado em um `emptyDir`, então o Log4j consegue gravar mesmo com o root filesystem somente leitura. Os logs continuam disponíveis em stdout (coletados pelo OpenShift).
 
 ## Configuração Avançada
 

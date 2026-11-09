@@ -1,3 +1,11 @@
+{{- $basin := .Values.config.default.name -}}
+{{- with .Values.config.selectedBasins -}}
+{{- $basin = first . -}}
+{{- else -}}
+{{- with .Values.config.basins -}}
+{{- $basin = (first .).name -}}
+{{- end -}}
+{{- end -}}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -11,5 +19,5 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['{{ include "sace.fullname" . }}:{{ .Values.service.port }}']
+      args: ['{{ include "sace.fullname" . }}-{{ $basin }}:{{ .Values.service.port }}/{{ $basin }}/']
   restartPolicy: Never

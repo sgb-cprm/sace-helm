@@ -3,25 +3,16 @@ config:
     enableScheduling: true
     enableRetrieve: true
     jvm:
-      xmx: 512
-      xms: 1536
+      xmx: 1536
+      xms: 512
     db:
       pass: sace
       user: sace
-    imageDir: /mnt/sace/data
-    geoserver:
-      url: 'http://sace.sgb-sace-homolog.apps.ocp.sgb.local/geoserver'
 
   basins:
     - name: branco
       title: Bacia do Branco
       # url: http://sace.sgb.gov.br/geoserver/branco
-      # imageDir: /opt/sace/data
-      bounds:
-        minX: -65
-        minY: -2
-        maxX: -59
-        maxY: 6
       # jvm:
       #   xmx: 1024
       #   xms: 2048
@@ -30,11 +21,6 @@ config:
       db:
         # pass: sace123
         url: jdbc:postgresql://sace-postgresql.sgb-sace-homolog.svc.cluster.local:5432/sace_branco
-      geoserver:
-        workspace: BRANCO
-        # url: http://sace.sgb.gov.br/geoserver
-      extras: 
-        x: z
       overrideValues:
         autoscaling:
           enabled: true
@@ -47,17 +33,8 @@ config:
     - name: araguaia
       title: Bacia do Araguaia
       # url: http://sace.sgb-sace-homolog.apps-crc.testing/araguaia
-      # imageDir: /mnt/sace/data
-      bounds:
-        minX: -23
-        minY: -23
-        maxX: -58
-        maxY: -12
       db:
         url: jdbc:postgresql://sace-postgresql.sgb-sace-homolog.svc.cluster.local:5432/sace_araguaia
-      geoserver:
-        workspace: ARAGUAIA
-        # url: http://sace.sgb-sace-homolog.apps-crc.testing/geoserver
       overrideValues:
         # autoscaling:
         #   enabled: true

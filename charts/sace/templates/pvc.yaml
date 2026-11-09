@@ -13,6 +13,9 @@
 {{- end -}}
 
 {{- range $index, $item := $saceBasins -}}
+{{- if $index }}
+---
+{{ end }}
 {{- $_saceProps := mergeOverwrite (deepCopy $saceDefault) $item -}}
 {{- $_overrideValues := (hasKey $_saceProps "overrideValues" | ternary $_saceProps.overrideValues dict) -}}
 
@@ -49,7 +52,4 @@ spec:
       storage: {{ .storage.size }}
 {{- end }}
 {{- end }}
-{{ if ne (add1 $index) $saceNumBasins -}}
----
-{{- end -}}
-{{- end -}}
+{{- end }}

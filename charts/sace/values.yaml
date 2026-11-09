@@ -25,20 +25,27 @@ serviceAccount:
 
 podAnnotations: {}
 
-podSecurityContext: {}
+podSecurityContext:
+  seccompProfile:
+    type: RuntimeDefault
   # fsGroup: 2000
 
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  runAsNonRoot: true
   # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
   # runAsUser: 1000
 
 service:
   type: ClusterIP
-  port: 8082
+  port: 8080
+
+# Porta em que a aplicação (Spring Boot embedded Tomcat) escuta dentro do container.
+# Corresponde ao server.port=8080 do application.properties e ao EXPOSE 8080 do Dockerfile.
+containerPort: 8080
 
 
 resources: {}
@@ -102,16 +109,26 @@ config:
     title: SACE Web
     url: ""
     persistence: /mnt/sace/data
+    # Fuso horário da JVM (USER_TIMEZONE do docker-entrypoint.sh)
+    timezone: America/Sao_Paulo
+    # Diretório de GeoJSON. Se vazio, usa <persistence>/geojson.
+    geojsonDir: ""
+    # Caminho do wms-layers-config.json. Se vazio, usa
+    # /opt/sace/config/wms/wms-layers-config-<nome-da-bacia>.json (arquivos embarcados na imagem).
     wmsConfigJson: ""
     javaOpts: ""
     kafkaBootstrapServers: "kafka:9092"
     kafkaTopico: "medicoes"
+    kafkaPrevisoes:
+      topico: "previsoes"
+      habilitado: false
+    forecastManager:
+      habilitado: false
+      url: "http://localhost:8000"
+      clientId: ""
+      clientSecret: ""
+      timeoutMs: 3000
     mailHost: "localhost"
-    bounds:
-      minX: -75
-      minY: -35
-      maxX: -35
-      maxY: 6
     enableScheduling: false
     enableRetrieve: false
     jvm:
@@ -121,9 +138,6 @@ config:
       url: jdbc:postgresql://postgresdb:5432/sace
       user: postgres
       pass: postgres
-    geoserver:
-      workspace: main
-      # url: /geoserver
   basins: []
   # TODO: Forçar recreate do pod nginx por mudança do configmap https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
   selectedBasins: []

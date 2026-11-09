@@ -15,6 +15,9 @@
 {{- end -}}
 
 {{- range $index, $item := $saceBasins -}}
+{{- if $index }}
+---
+{{ end }}
 {{- $_saceProps := mergeOverwrite (deepCopy $saceDefault) $item -}}
 {{- $_overrideValues := (hasKey $_saceProps "overrideValues" | ternary $_saceProps.overrideValues dict) -}}
 
@@ -62,10 +65,13 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       restartPolicy: Always
+      terminationGracePeriodSeconds: 30
       volumes:
         - name: sace-data
           persistentVolumeClaim:
             claimName: {{ $_saceName }}
+        - name: sace-logs
+          emptyDir: {}
         {{- with $.Values.volumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -90,20 +96,37 @@ spec:
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ $.Values.service.port }}
+              containerPort: {{ $.Values.containerPort }}
               protocol: TCP
+          startupProbe:
+            httpGet:
+              path: /{{ $_saceProps.name }}/
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /{{ $_saceProps.name }}/
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
           livenessProbe:
             httpGet:
               path: /{{ $_saceProps.name }}/
               port: http
-            initialDelaySeconds: 60
             periodSeconds: 30
             timeoutSeconds: 5
             successThreshold: 1
-            failureThreshold: 5
+            failureThreshold: 3
           volumeMounts:
             - mountPath: {{ $_saceProps.persistence }}
               name: sace-data
+            - mountPath: /app/logs
+              name: sace-logs
             {{- with $.Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -141,8 +164,4 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-
-{{ if ne (add1 $index) $saceNumBasins -}}
----
-{{- end -}}
-{{- end -}}
+{{- end }}
